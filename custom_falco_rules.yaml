@@ -5,7 +5,6 @@
   append: true
   condition: and not proc.pname in (falco_binaries)
 
-# sshd, mail programs attempt to setuid to root even when running as non-root. Excluding here to avoid meaningless FPs
 - rule: Non sudo setuid
   desc: >
     an attempt to change users by calling setuid. sudo/su are excluded. users "root" and "nobody"
@@ -21,7 +20,6 @@
     and not java_running_sdjagent
     and not nrpe_becoming_nagios
     and not user_known_non_sudo_setuid_conditions
-    and not pod.name in (argocd-redis-ha-server-1, argocd-redis-ha-server-2)
   output: >
     Unexpected setuid call by non-sudo, non-root program (user=%user.name user_loginuid=%user.loginuid cur_uid=%user.uid parent=%proc.pname
     command=%proc.cmdline pid=%proc.pid uid=%evt.arg.uid container_id=%container.id image=%container.image.repository)
