@@ -1,10 +1,3 @@
-- list: falco_binaries
-  items: [falcoctl]
-
-- macro: write_etc_common
-  append: true
-  condition: and not proc.pname in (falco_binaries)
-
 - rule: Non sudo setuid
   desc: >
     an attempt to change users by calling setuid. sudo/su are excluded. users "root" and "nobody"
@@ -25,9 +18,3 @@
     command=%proc.cmdline pid=%proc.pid uid=%evt.arg.uid container_id=%container.id image=%container.image.repository)
   priority: WARNING
   tags: [host, container, users, mitre_privilege_escalation, T1548.001]
-
-- macro: user_known_user_management_activities
-  condition: (never_true)
-
-- macro: chage_list
-  condition: (proc.name=chage and (proc.cmdline contains "-l" or proc.cmdline contains "--list"))

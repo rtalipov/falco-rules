@@ -1,8 +1,24 @@
 ---
 name: Release Rulesfile
 on: push
+
 jobs:
+  falco-rule-validate:
+    runs-on: ubuntu-latest
+    name: Falco Rule Validation
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+          
+      - name: Validate Falco rules
+        uses: addnab/docker-run-action@v3
+        with:
+          image: falcosecurity/falco:latest
+          options: --rm -v ${{ github.workspace }}/custom_falco_rules.yaml:/etc/falco/custom_falco_rules.yaml
+          run: /usr/bin/falco -r /etc/falco/falco_rules.yaml -r /etc/falco/custom_falco_rules.yaml -L
+
   Release-Rulesfile:
+    needs: falco-rule-validate
     runs-on: ubuntu-latest
 
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
