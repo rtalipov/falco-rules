@@ -25,7 +25,7 @@
   output: >
     Unexpected setuid call by non-sudo, non-root program (user=%user.name user_loginuid=%user.loginuid cur_uid=%user.uid parent=%proc.pname
     command=%proc.cmdline pid=%proc.pid uid=%evt.arg.uid container_id=%container.id image=%container.image.repository)
-  priority: NOTICE
+  priority: WARNING
   tags: [host, container, users, mitre_privilege_escalation, T1548.001]
 
 - macro: user_known_user_management_activities
