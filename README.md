@@ -1,14 +1,18 @@
-# Falco Rules GitHub Actions Workflow
+# Release Falco Rulesfile Workflow  
 
-This repository contains a GitHub Actions workflow to validate Falco security rules. The workflow is defined in `falco.yml`.
+## Overview  
+This GitHub Actions workflow automates the validation and release of Falco custom rules. It ensures that the rules are correctly formatted and then publishes them as an OCI artifact to GitHub Packages.  
 
-## How It Works
-- Runs on `push` and `pull_request` events.
-- Uses a Docker container to validate Falco rules.
-- Outputs validation results in GitHub Actions logs.
+## Workflow Steps  
+1. **Falco Rule Validation**  
+   - Checks out the repository.  
+   - Validates the Falco rules using the official Falco container.  
 
-## Usage
-1. Modify Falco rules.
-2. Push changes or create a pull request.
-3. The workflow will validate the rules automatically.
-4. Check logs for validation results.
+2. **Release Rulesfile** (Runs after validation)  
+   - Checks out the Falcoctl repository and sets up Golang.  
+   - Builds `falcoctl` from source.  
+   - Checks out the rules repository.  
+   - Uploads the validated rules file as an OCI artifact to GitHub Packages.  
+
+## OCI Artifact Details  
+- The rules file is stored in GitHub's container registry (`ghcr.io`).
