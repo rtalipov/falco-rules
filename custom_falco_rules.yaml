@@ -1,3 +1,6 @@
+- macro: known_user_in_container
+  condition: (container and not user.name in ("<NA>","N/A",""))
+
 - rule: Non sudo setuid
   desc: >
     an attempt to change users by calling setuid. sudo/su are excluded. users "root" and "nobody"
