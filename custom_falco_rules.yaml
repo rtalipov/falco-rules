@@ -1,24 +1,20 @@
-- macro: known_user_in_container
-  condition: (container and not user.name in ("<NA>","N/A",""))
+- macro: user_expected_terminal_shell_in_container_conditions
+  condition: (never_true)
 
-- rule: Non sudo setuid
+- rule: Terminal shell in container
   desc: >
-    an attempt to change users by calling setuid. sudo/su are excluded. users "root" and "nobody"
-    suing to itself are also excluded, as setuid calls typically involve dropping privileges.
+    A shell was used as the entrypoint/exec point into a container with an attached terminal. Parent process may have 
+    legitimately already exited and be null (read container_entrypoint macro). Common when using "kubectl exec" in Kubernetes. 
+    Correlate with k8saudit exec logs if possible to find user or serviceaccount token used (fuzzy correlation by namespace and pod name). 
+    Rather than considering it a standalone rule, it may be best used as generic auditing rule while examining other triggered 
+    rules in this container/tty.
   condition: >
-    evt.type=setuid and evt.dir=>
-    and (known_user_in_container or not container)
-    and not (user.name=root or user.uid=0)
-    and not somebody_becoming_themselves
-    and not proc.name in (known_setuid_binaries, userexec_binaries, mail_binaries, docker_binaries,
-                          nomachine_binaries)
-    and not proc.name startswith "runc:"
-    and not java_running_sdjagent
-    and not nrpe_becoming_nagios
-    and not user_known_non_sudo_setuid_conditions
-    and not k8s.pod.name in (argocd-redis-ha-server-1, argocd-redis-ha-server-2)
-  output: >
-    Unexpected setuid call by non-sudo, non-root program (user=%user.name user_loginuid=%user.loginuid cur_uid=%user.uid parent=%proc.pname
-    command=%proc.cmdline pid=%proc.pid uid=%evt.arg.uid container_id=%container.id image=%container.image.repository)
-  priority: WARNING
-  tags: [host, container, users, mitre_privilege_escalation, T1548.001]
+    spawned_process 
+    and container
+    and shell_procs 
+    and proc.tty != 0
+    and container_entrypoint
+    and not user_expected_terminal_shell_in_container_conditions
+  output: A shell was spawned in a container with an attached terminal (evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty exe_flags=%evt.arg.flags %container.info)
+  priority: NOTICE
+  tags: [maturity_stable, container, shell, mitre_execution, T1059]
